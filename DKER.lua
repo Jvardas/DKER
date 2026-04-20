@@ -39,25 +39,32 @@ local function InitSettings()
 end
 
 -- ============================================================
--- Warning frame — red text, bobs up and down for 5 seconds
+-- Warning frame — bobs up and down until enchant is fixed
 -- ============================================================
 local warnFrame = CreateFrame("Frame", nil, UIParent)
-warnFrame:SetSize(700, 60)
+warnFrame:SetSize(700, 95)
 warnFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 80)
 warnFrame:SetFrameStrata("HIGH")
 warnFrame:Hide()
 
 local warnText = warnFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 warnText:SetAllPoints()
-warnText:SetTextColor(1, 0, 0, 1)
 warnText:SetJustifyH("CENTER")
+warnText:SetJustifyV("MIDDLE")
 
+-- REPEAT with explicit up+down avoids the jitter BOUNCE causes at reversal
 local bobAnim = warnFrame:CreateAnimationGroup()
-bobAnim:SetLooping("BOUNCE")
+bobAnim:SetLooping("REPEAT")
 local moveUp = bobAnim:CreateAnimation("Translation")
+moveUp:SetOrder(1)
 moveUp:SetDuration(0.45)
 moveUp:SetOffset(0, 12)
 moveUp:SetSmoothing("IN_OUT")
+local moveDown = bobAnim:CreateAnimation("Translation")
+moveDown:SetOrder(2)
+moveDown:SetDuration(0.45)
+moveDown:SetOffset(0, -12)
+moveDown:SetSmoothing("IN_OUT")
 
 local function ShowWarning(msg)
     warnText:SetText(msg)
@@ -107,6 +114,29 @@ local function GetEnchantName(id)
     return "Unknown"
 end
 
+-- DK runes are not stored as standard item enchants and don't appear in
+-- GetWeaponEnchantInfo() or the item link enchant slot. Scan the tooltip instead.
+local SLOT_MH = 16
+local SLOT_OH = 17
+
+local function GetSlotRune(slotID)
+    local data = C_TooltipInfo.GetInventoryItem("player", slotID)
+    if not data then return 0 end
+    for _, line in ipairs(data.lines or {}) do
+        local text = line.leftText
+        if text then
+            -- strip color codes so matching works regardless of highlight color
+            text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+            for _, e in ipairs(ENCHANTS) do
+                if e.id ~= 0 and text:find(e.name, 1, true) then
+                    return e.id
+                end
+            end
+        end
+    end
+    return 0
+end
+
 local function CheckEnchant()
     if not ShouldCheck() then return end
 
@@ -121,9 +151,8 @@ local function CheckEnchant()
     local expectedOH = settings.oh or 0
     if expectedMH == 0 and expectedOH == 0 then return end
 
-    local hasMain, _, _, mainId, hasOff, _, _, offId = GetWeaponEnchantInfo()
-    local currentMH = hasMain and mainId or 0
-    local currentOH = hasOff and offId or 0
+    local currentMH = GetSlotRune(SLOT_MH)
+    local currentOH = GetSlotRune(SLOT_OH)
 
     local msgs = {}
     if expectedMH ~= 0 and currentMH ~= expectedMH then
@@ -134,7 +163,11 @@ local function CheckEnchant()
     end
 
     if #msgs > 0 then
-        ShowWarning("WRONG ENCHANT! Expected: " .. table.concat(msgs, " | "))
+        local lines = { "|cFFFF0000WRONG ENCHANT!|r" }
+        for _, msg in ipairs(msgs) do
+            table.insert(lines, msg)
+        end
+        ShowWarning(table.concat(lines, "\n"))
     else
         HideWarning()
     end
@@ -263,6 +296,14 @@ for _, opt in ipairs(TRIGGER_OPTIONS) do
     end)
     checkboxes[opt.key] = cb
 end
+
+local minimapHint = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+minimapHint:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 14, 10)
+minimapHint:SetText("|cFF888888/dker minimap – restore button|r")
+
+local versionLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+versionLabel:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -14, 10)
+versionLabel:SetText("|cFF888888v" .. (C_AddOns.GetAddOnMetadata(ADDON_NAME, "Version") or "?") .. "|r")
 
 frame:SetScript("OnShow", function()
     if not DKERSettings then return end

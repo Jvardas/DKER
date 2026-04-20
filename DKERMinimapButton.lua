@@ -4,7 +4,7 @@ DKERIcon = LibStub("LibDBIcon-1.0", true)
 local miniButton = LibStub("LibDataBroker-1.1"):NewDataObject("DKERButton", {
     type = "data source",
     text = "DKER",
-    icon = "Interface\\Icons\\spell_deathknight_runeweapon",
+    icon = "Interface\\AddOns\\DKER\\DKER",
     OnClick = function(self, btn)
         if btn == "LeftButton" then
             DKERFrame:SetShown(not DKERFrame:IsShown())
