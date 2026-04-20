@@ -4,6 +4,8 @@
 ## Author: RetroLizard
 ## Version: @project-version@
 ## SavedVariables: DKERSettings DKERMinimapPos
+## X-Curse-Project-ID:: 1520160
+## X-Wago-ID: ANzka064
 
 libs/Ace3/AceAddon-3.0/AceAddon-3.0.lua
 libs/Ace3/AceDB-3.0/AceDB-3.0.lua
