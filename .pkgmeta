@@ -1,0 +1,17 @@
+package-as: DKER
+
+externals:
+  libs/Ace3:
+    url: https://repos.curseforge.com/wow/ace3/trunk
+  libs/LibDBIcon-1.0:
+    url: https://repos.curseforge.com/wow/libdbicon-1.0/trunk/LibDBIcon-1.0
+  libs/LibDataBroker-1.1:
+    url: https://repos.curseforge.com/wow/libdatabroker-1-1/trunk
+
+ignore:
+  - .github
+  - .gitignore
+  - .pkgmeta
+  - README.md
+  - CHANGELOG.md
+  - "**/.*"
