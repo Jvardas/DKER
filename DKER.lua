@@ -25,12 +25,16 @@ local function InitSettings()
             Frost  = { mh = 0, oh = 0 },
             Unholy = { mh = 0, oh = 0 },
             hideMinimapButton = false,
+            triggerMode = { dungeon = true, mythicplus = true, raid = true, everywhere = false },
         }
     end
     for _, spec in ipairs(SPECS) do
         if type(DKERSettings[spec]) ~= "table" then
             DKERSettings[spec] = { mh = 0, oh = 0 }
         end
+    end
+    if type(DKERSettings.triggerMode) ~= "table" then
+        DKERSettings.triggerMode = { dungeon = true, mythicplus = true, raid = true, everywhere = false }
     end
 end
 
@@ -59,15 +63,43 @@ local function ShowWarning(msg)
     warnText:SetText(msg)
     warnFrame:Show()
     bobAnim:Play()
-    C_Timer.After(5, function()
-        bobAnim:Stop()
-        warnFrame:Hide()
-    end)
+end
+
+local function HideWarning()
+    bobAnim:Stop()
+    warnFrame:Hide()
 end
 
 -- ============================================================
 -- Enchant check
 -- ============================================================
+local function ShouldCheck()
+    if not DKERSettings then return false end
+    local mode = DKERSettings.triggerMode
+    if not mode then return false end
+
+    if mode.everywhere then
+        return IsInGroup()
+    end
+
+    local inInstance, instanceType = IsInInstance()
+    if not inInstance then return false end
+
+    local _, _, difficultyID = GetInstanceInfo()
+
+    if instanceType == "party" then
+        if difficultyID == 8 then
+            return mode.mythicplus == true
+        else
+            return mode.dungeon == true
+        end
+    elseif instanceType == "raid" then
+        return mode.raid == true
+    end
+
+    return false
+end
+
 local function GetEnchantName(id)
     for _, e in ipairs(ENCHANTS) do
         if e.id == id then return e.name end
@@ -76,7 +108,7 @@ local function GetEnchantName(id)
 end
 
 local function CheckEnchant()
-    if not IsInGroup() then return end
+    if not ShouldCheck() then return end
 
     local specIndex = GetSpecialization()
     if not specIndex then return end
@@ -103,6 +135,8 @@ local function CheckEnchant()
 
     if #msgs > 0 then
         ShowWarning("WRONG ENCHANT! Expected: " .. table.concat(msgs, " | "))
+    else
+        HideWarning()
     end
 end
 
@@ -110,7 +144,7 @@ end
 -- Settings frame
 -- ============================================================
 local FRAME_W = 530
-local FRAME_H = 205
+local FRAME_H = 285
 
 local frame = CreateFrame("Frame", "DKERFrame", UIParent, "BackdropTemplate")
 frame:SetSize(FRAME_W, FRAME_H)
@@ -197,6 +231,39 @@ for i, spec in ipairs(SPECS) do
     CreateSpecRow(spec, i)
 end
 
+local div = frame:CreateTexture(nil, "ARTWORK")
+div:SetTexture("Interface\\Buttons\\WHITE8X8")
+div:SetVertexColor(0.25, 0.25, 0.25, 1)
+div:SetHeight(1)
+div:SetPoint("TOPLEFT",  frame, "TOPLEFT",   14, -175)
+div:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -14, -175)
+
+local triggerLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+triggerLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", 14, -185)
+triggerLabel:SetText("Check in:")
+
+local TRIGGER_OPTIONS = {
+    { key = "dungeon",    label = "Dungeon",    x = 105 },
+    { key = "mythicplus", label = "Mythic+",    x = 210 },
+    { key = "raid",       label = "Raid",       x = 315 },
+    { key = "everywhere", label = "Everywhere", x = 400 },
+}
+
+local checkboxes = {}
+
+for _, opt in ipairs(TRIGGER_OPTIONS) do
+    local cb = CreateFrame("CheckButton", "DKERCheck_" .. opt.key, frame, "UICheckButtonTemplate")
+    cb:SetSize(24, 24)
+    cb:SetPoint("TOPLEFT", frame, "TOPLEFT", opt.x, -210)
+    local lbl = cb:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    lbl:SetPoint("LEFT", cb, "RIGHT", 2, 0)
+    lbl:SetText(opt.label)
+    cb:SetScript("OnClick", function(self)
+        DKERSettings.triggerMode[opt.key] = self:GetChecked() and true or false
+    end)
+    checkboxes[opt.key] = cb
+end
+
 frame:SetScript("OnShow", function()
     if not DKERSettings then return end
     for _, specName in ipairs(SPECS) do
@@ -211,6 +278,11 @@ frame:SetScript("OnShow", function()
                     end
                 end
             end
+        end
+    end
+    if DKERSettings.triggerMode then
+        for key, cb in pairs(checkboxes) do
+            cb:SetChecked(DKERSettings.triggerMode[key] == true)
         end
     end
 end)
@@ -238,7 +310,7 @@ end
 -- ============================================================
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
-eventFrame:RegisterEvent("GROUP_JOINED")
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
 eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
@@ -246,7 +318,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         InitSettings()
         self:UnregisterEvent("ADDON_LOADED")
-    elseif event == "GROUP_JOINED"
+    elseif event == "PLAYER_ENTERING_WORLD"
         or (event == "UNIT_INVENTORY_CHANGED" and arg1 == "player")
         or event == "PLAYER_SPECIALIZATION_CHANGED" then
         CheckEnchant()

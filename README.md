@@ -1,4 +1,4 @@
-# DKER
+# DKER - DK Enchant Reminder
 
 A minimal World of Warcraft addon that reminds Death Knights if they have the wrong weapon enchant (rune) equipped for their current specialization.
 
