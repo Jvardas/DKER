@@ -8,8 +8,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@master
 
       - name: Package and publish
         uses: BigWigsMods/packager@master
