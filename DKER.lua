@@ -8,10 +8,10 @@ local ENCHANTS = {
     { id = 3368, name = "Rune of the Fallen Crusader" },
     { id = 3370, name = "Rune of Razorice" },
     { id = 3847, name = "Rune of the Stoneskin Gargoyle" },
-    { id = 3369, name = "Rune of Swordshattering" },
-    { id = 6241, name = "Rune of the Apocalypse" },   -- verify ID in-game
-    { id = 6586, name = "Rune of Unending Thirst" },  -- verify ID in-game
-    { id = 6587, name = "Rune of Spellwarding" },     -- verify ID in-game
+    { id = 6241, name = "Rune of Sanguination" },
+    { id = 6242, name = "Rune of Spellwarding" },
+    { id = 6244, name = "Rune of Unending Thirst" },
+    { id = 6245, name = "Rune of Apocalypse" }
 }
 
 
