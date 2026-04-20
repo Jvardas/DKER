@@ -158,7 +158,8 @@ local function CheckEnchant()
     if expectedMH ~= 0 and currentMH ~= expectedMH then
         table.insert(msgs, "MH: " .. GetEnchantName(expectedMH))
     end
-    if expectedOH ~= 0 and currentOH ~= expectedOH then
+    local hasOH = GetInventoryItemLink("player", SLOT_OH) ~= nil
+    if expectedOH ~= 0 and hasOH and currentOH ~= expectedOH then
         table.insert(msgs, "OH: " .. GetEnchantName(expectedOH))
     end
 
@@ -252,6 +253,7 @@ local function CreateSpecRow(specName, rowIndex)
                 info.func = function()
                     DKERSettings[specName][slot] = enchant.id
                     UIDropDownMenu_SetText(dd, enchant.name)
+                    CheckEnchant()
                 end
                 UIDropDownMenu_AddButton(info)
             end
@@ -354,11 +356,14 @@ eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
 eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+eventFrame:RegisterEvent("GROUP_LEFT")
 
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         InitSettings()
         self:UnregisterEvent("ADDON_LOADED")
+    elseif event == "GROUP_LEFT" then
+        HideWarning()
     elseif event == "PLAYER_ENTERING_WORLD"
         or (event == "UNIT_INVENTORY_CHANGED" and arg1 == "player")
         or event == "PLAYER_SPECIALIZATION_CHANGED" then
