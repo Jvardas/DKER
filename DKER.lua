@@ -138,7 +138,10 @@ local function GetSlotRune(slotID)
 end
 
 local function CheckEnchant()
-    if not ShouldCheck() then return end
+    if not ShouldCheck() then
+        HideWarning()
+        return
+    end
 
     local specIndex = GetSpecialization()
     if not specIndex then return end
@@ -151,14 +154,15 @@ local function CheckEnchant()
     local expectedOH = settings.oh or 0
     if expectedMH == 0 and expectedOH == 0 then return end
 
-    local currentMH = GetSlotRune(SLOT_MH)
-    local currentOH = GetSlotRune(SLOT_OH)
+    local hasMH = GetInventoryItemLink("player", SLOT_MH) ~= nil
+    local hasOH = GetInventoryItemLink("player", SLOT_OH) ~= nil
+    local currentMH = hasMH and GetSlotRune(SLOT_MH) or 0
+    local currentOH = hasOH and GetSlotRune(SLOT_OH) or 0
 
     local msgs = {}
-    if expectedMH ~= 0 and currentMH ~= expectedMH then
+    if expectedMH ~= 0 and hasMH and currentMH ~= expectedMH then
         table.insert(msgs, "MH: " .. GetEnchantName(expectedMH))
     end
-    local hasOH = GetInventoryItemLink("player", SLOT_OH) ~= nil
     if expectedOH ~= 0 and hasOH and currentOH ~= expectedOH then
         table.insert(msgs, "OH: " .. GetEnchantName(expectedOH))
     end
@@ -295,6 +299,7 @@ for _, opt in ipairs(TRIGGER_OPTIONS) do
     lbl:SetText(opt.label)
     cb:SetScript("OnClick", function(self)
         DKERSettings.triggerMode[opt.key] = self:GetChecked() and true or false
+        CheckEnchant()
     end)
     checkboxes[opt.key] = cb
 end

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4] - 2026-04-21
+
+### Added
+- Fix MH warning showing even on not wearing an MH
+- Fix live hide/unhide warning based on config
+- Add icon in addons tab
+
 ## [1.0.3] - 2026-04-21
 
 ### Added
