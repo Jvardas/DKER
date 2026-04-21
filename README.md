@@ -5,6 +5,7 @@ A minimal World of Warcraft addon that reminds Death Knights if they have the wr
 ## Features
 
 - **Per-spec configuration** — set an expected Main Hand and Off Hand rune for Blood, Frost, and Unholy independently
+- **Per-instance configuration** — set where you want the warning to be shown from Everywhere to just Dungeon or M+ or Raid
 - **On-screen warning** — a red, animated message appears in the center of the screen when you join a party with the wrong rune equipped
 - **Minimap button** — quick access to the settings panel; right-click to hide the button
 - **`/dker`** — opens the settings panel from anywhere

@@ -1,4 +1,4 @@
-## Interface: 120001
+## Interface: 120001, 120005
 ## Title: DKER
 ## Notes: Reminds Death Knights if they have the wrong weapon enchant for their spec.
 ## Author: RetroLizard
