@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.3] - 2026-04-21
+
+### Added
+- Fix packaging
+
 ## [1.0.2] - 2026-04-21
 
 ### Added

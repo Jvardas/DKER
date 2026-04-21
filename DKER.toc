@@ -7,10 +7,12 @@
 ## X-Curse-Project-ID: 1520160
 ## X-Wago-ID: ANzka064
 
+libs/LibStub/LibStub.lua
+libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
+libs/LibDataBroker-1.1/LibDataBroker-1.1.lua
+libs/LibDBIcon-1.0/LibDBIcon-1.0.lua
 libs/Ace3/AceAddon-3.0/AceAddon-3.0.lua
 libs/Ace3/AceDB-3.0/AceDB-3.0.lua
-libs/LibDBIcon-1.0/embeds.xml
-libs/LibDBIcon-1.0/LibDBIcon-1.0/LibDBIcon-1.0.lua
 
 DKER.lua
 DKERMinimapButton.lua
